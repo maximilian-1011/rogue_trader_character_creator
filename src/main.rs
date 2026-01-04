@@ -21,7 +21,7 @@ fn main() {
             "1" => {
                 let mut attributes = get_attributes();
                 let (mut basic_skills, mut skills, mut talents, mut points) = apply_homeworld(&mut attributes);
-                let (attributes, basic_skills, skills, talents, points) = apply_birthrite(&mut attributes, &mut basic_skills, &mut skills, &mut talents, &mut points);
+                apply_birthright(&mut attributes, &mut basic_skills, &mut skills, &mut talents, &mut points);
                 for name in ATTRIBUTE_NAMES{
                     let val:&i32 = attributes.get(name).expect("An error occured");
                     println!("{}:{}", name, val);
@@ -292,7 +292,7 @@ fn apply_homeworld(x: &mut HashMap<&str, i32>) -> (Vec<&'static str>, Vec<&'stat
     result
 }
 
-fn apply_birthrite<'a>(attributes: &'a mut HashMap<&'a str, i32>, basic_skills: &'a mut Vec<&'static str>, skills: &'a mut Vec<&'static str>, talents: &'a mut Vec<&'static str>, points: &'a mut [i32; 4]) -> (&'a mut HashMap<&'a str, i32>, &'a mut Vec<&'static str>, &'a mut Vec<&'static str>, &'a mut Vec<&'static str>, &'a [i32; 4]) {
+fn apply_birthright(attributes: &mut HashMap<&str, i32>, basic_skills: &mut Vec<&'static str>, skills: &mut Vec<&'static str>, talents: &mut Vec<&'static str>, points: &mut [i32; 4]) {
     let birthrights = ["Scavenger", "Scapegrace", "Stubjack", "Child of the Creed", "Savant", "Vaunted"];
     loop {
         {
@@ -356,7 +356,6 @@ fn apply_birthrite<'a>(attributes: &'a mut HashMap<&'a str, i32>, basic_skills: 
         };
 
     };
-    return (attributes, basic_skills, skills, talents, points)
 }
 
 fn chose_talent(talents: &mut Vec<&'static str>, option_1: &'static str, option_2: &'static str) {
