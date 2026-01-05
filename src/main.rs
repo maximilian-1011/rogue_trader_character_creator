@@ -20,20 +20,29 @@ fn main() {
         match input.trim() {
             "1" => {
                 let mut attributes = get_attributes();
+                let mut items: Vec<&str> = vec![];
                 let (mut basic_skills, mut skills, mut talents, mut points) = apply_homeworld(&mut attributes);
                 apply_birthright(&mut attributes, &mut basic_skills, &mut skills, &mut talents, &mut points);
+                apply_lure_of_the_void(&mut attributes, &mut basic_skills, &mut skills, &mut talents, &mut items, &mut points);
+                println!("");
+                println!("");
                 for name in ATTRIBUTE_NAMES{
                     let val:&i32 = attributes.get(name).expect("An error occured");
                     println!("{}:{}", name, val);
                 }
                 let toughness_bonus = attributes.get("Toughness").expect("An error occured") / 10;
+                println!("");
                 println!("Starting Wounds : {}", 2 * toughness_bonus + &points[0]);
                 println!("Fate Points: {}", &points[1]);
                 println!("Insanity Points: {}", &points[2]);
                 println!("Corruption Points: {}", &points[3]);
+                println!("XP to spend: {}", &points[4]);
+                println!("");
                 println!("Basic Skills: {:?}", basic_skills);
                 println!("Trained Skills: {:?}", skills);
                 println!("Talents and Traits: {:?}", talents);
+                println!("Items: {:?}", items);
+                println!("");
                 break;
             },
             "2" => return,
@@ -96,9 +105,10 @@ fn get_attributes() -> HashMap<&'static str, i32> {
     return attributes;
 }
 
-fn apply_homeworld(x: &mut HashMap<&str, i32>) -> (Vec<&'static str>, Vec<&'static str>, Vec<&'static str>, [i32; 4]) {
+fn apply_homeworld(x: &mut HashMap<&str, i32>) -> (Vec<&'static str>, Vec<&'static str>, Vec<&'static str>, [i32; 5]) {
     let homeworlds = ["Death World", "Void Born", "Forge World", "Hive World", "Imperial World", "Noble Born"];
-    let mut points = [0; 4];
+    let mut points = [0; 5];
+    points[4] = 500;
     let result = loop {
         {
             println!("Please choose a homeworld:");
@@ -292,7 +302,7 @@ fn apply_homeworld(x: &mut HashMap<&str, i32>) -> (Vec<&'static str>, Vec<&'stat
     result
 }
 
-fn apply_birthright(attributes: &mut HashMap<&str, i32>, basic_skills: &mut Vec<&'static str>, skills: &mut Vec<&'static str>, talents: &mut Vec<&'static str>, points: &mut [i32; 4]) {
+fn apply_birthright(attributes: &mut HashMap<&str, i32>, basic_skills: &mut Vec<&'static str>, skills: &mut Vec<&'static str>, talents: &mut Vec<&'static str>, points: &mut [i32; 5]) {
     let birthrights = ["Scavenger", "Scapegrace", "Stubjack", "Child of the Creed", "Savant", "Vaunted"];
     loop {
         {
@@ -356,6 +366,267 @@ fn apply_birthright(attributes: &mut HashMap<&str, i32>, basic_skills: &mut Vec<
         };
 
     };
+}
+
+fn apply_lure_of_the_void(attributes: &mut HashMap<&str, i32>, _basic_skills: &mut Vec<&'static str>, skills: &mut Vec<&'static str>, talents: &mut Vec<&'static str>,items: &mut Vec<&'static str>, points: &mut [i32; 5]) {
+    let lures_of_the_void = ["Tainted", "Criminal", "Renegade", "Duty Bound", "Zealot", "Chosen by Destiny"];
+    loop {
+        {
+            println!("Please choose a Lure of the Void:");
+            for i in 0..6 {
+                print!("[{}] {} ", i+1, &lures_of_the_void[i]);
+            }
+            println!("");
+        }
+
+        let mut input = String::new();
+        io::stdin()
+                    .read_line(&mut input)
+                    .expect("Failed to read the input!");
+        
+        match input.trim() {
+            "1" => {
+                let options = vec!["Mutant", "Insane", "Deviant Philosophy"];
+                loop {
+                    let tainted_choice = chose_option(&options);
+                    match tainted_choice.trim() {
+                        "1" => {
+                            let options_2 = vec!["Roll a random Mutation", "Chose a Mutation between 1-75"];
+                            loop {
+                                let choice_2 = chose_option(&options_2);
+                                match choice_2.trim() {
+                                    "1" => {
+                                        println!("Your mutation roll is {}", rand::thread_rng().gen_range(0..=99));
+                                        break;
+                                    },
+                                    "2" => {
+                                        points[4] -= 200;
+                                        println!("Choose a Mutation");
+                                        break;
+                                    },
+                                    _=> invalid()
+                                }
+                            }
+                            break;
+                        },
+                        "2" => {
+                            let options_3 = vec!["Lose 3 Fellowship", "Lose 1 Fate point"];
+                            loop {
+                                let choice = chose_option(&options_3);
+                                match choice.trim() {
+                                    "1" => {
+                                        update_attribute(attributes, ATTRIBUTE_NAMES[8], -3);
+                                        break;
+                                    },
+                                    "2" => {
+                                        points[1] -= 1;
+                                        break;
+                                    },
+                                    _=> invalid()
+                                }
+                            }
+                            update_attribute(attributes, ATTRIBUTE_NAMES[3], 3);
+                            talents.push("Peer (The Insane)");
+                            points[2] += rand::thread_rng().gen_range(2..=20);
+                            break;
+                        },
+                        "3" => {
+                            update_attribute(attributes, ATTRIBUTE_NAMES[7], 3);
+                            talents.push("Enemy (Ecclesiarchy)");
+                            break;
+                        }
+                        _=> invalid()
+                    }
+                }
+                break;
+            },
+            "2" => {
+                let options = vec!["Wanted Fugitive", "Hunted", "Judged and Found Wanting"];
+                loop {
+                    let choice_criminal = chose_option(&options);
+                    match choice_criminal.trim() {
+                        "1" => {
+                            talents.push("Enemy (Adeptus Arbites)");
+                            talents.push("Peer (Underworld)");
+                            break;
+                        },
+                        "2" => {
+                            update_attribute(attributes, ATTRIBUTE_NAMES[6], 3);
+                            talents.push("Enemy (Underworld)");
+                            break;
+                        },
+                        "3" => {
+                            let option_judged = vec!["gain poor-Craftsmanship bionic", "Spend 200 xp to upgrade to common-Craftsmanship", "Spend 300 xp to upgrade to good-Craftsmanship"];
+                            loop {
+                                let choice_judged = chose_option(&option_judged);
+                                match choice_judged.trim() {
+                                    "1" => {
+                                        items.push("poor-Craftsmanship bionic");
+                                        break;
+                                    },
+                                    "2" => {
+                                        items.push("common-Craftsmanship bionic");
+                                        points[4] -= 200;
+                                        break;
+                                    },
+                                    "3" => {
+                                        items.push("good-Craftsmanship bionic");
+                                        points[4] -= 300;
+                                        break;
+                                    }
+                                    _=> invalid()
+                                }
+                            }
+                            break;
+                        },
+                        _=> invalid(),
+                    }
+                }
+                break;
+            },
+            "3" => {
+                let options = vec!["Recidivist", "Free-thinker", "Dark Visionary"];
+                loop {
+                    let choice_renegade = chose_option(&options);
+                    match choice_renegade.trim() {
+                        "1" => {
+                            talents.push("Enemy (Adeptus Arbites)");
+                            talents.push("Resistance (Interogation)");
+                            skills.push("Concealment");
+                            break;
+                        },
+                        "2" => {
+                            chose_attribute(attributes, ATTRIBUTE_NAMES[5], ATTRIBUTE_NAMES[6], 3);
+                            update_attribute(attributes, ATTRIBUTE_NAMES[7], -3);
+                            talents.push("Enemy (Ecclisiarchy)");
+                            break;
+                        },
+                        "3" => {
+                            chose_points_specific(points, 2, 3, rand::thread_rng().gen_range(1..=5)+1);
+                            talents.push("Dark Soul");
+                            skills.push("Forbiden Lore (Chose One)");
+                            break;
+                        }
+                        _=> invalid()
+                    }
+                }
+                break;
+            },
+            "4" => {
+                let options = vec!["Duty to the Throne", "Duty to Humanity", "Duty to Your Dynasty"];
+                loop {
+                    let choice_duty = chose_option(&options);
+                    match choice_duty.trim() {
+                        "1" => {
+                            update_attribute(attributes, ATTRIBUTE_NAMES[7], 3);
+                            let willpower = attributes.get(ATTRIBUTE_NAMES[7]).expect("An error occured");
+                            if *willpower >= 40 {
+                                talents.push("Armor of Contempt");
+                            }
+                            break;
+                        },
+                        "2" => {
+                            chose_attribute(attributes, ATTRIBUTE_NAMES[6], ATTRIBUTE_NAMES[5], 3);
+                            talents.push("-1 to the starting Profit Factor");
+                            break;
+                        },
+                        "3" => {
+                            talents.push("Rival (Rogue Trader Family)");
+                            update_attribute(attributes, ATTRIBUTE_NAMES[3], -3);
+                            talents.push("+1 to the starting Profit Factor");
+                        }
+                        _=> invalid(),
+                    }
+                }
+                break;
+            },
+            "5" => {
+                let options = vec!["Blessed Scars", "Unnerving Clarity", "Favoured of the Faithful"];
+                loop {
+                    let choice_zelot = chose_option(&options);
+                    match choice_zelot.trim() {
+                        "1" => {
+                            loop {
+                                let option_scar = vec!["gain poor-Craftsmanship bionic", "Spend 200 xp to upgrade to common-Craftsmanship", "Spend 300 xp to upgrade to good-Craftsmanship"];
+                                let choice_scar = chose_option(&option_scar);
+                                match choice_scar.trim() {
+                                    "1" => {
+                                        items.push("poor-Craftsmanship bionic");
+                                        break;
+                                    },
+                                    "2" => {
+                                        items.push("common-Craftsmanship bionic");
+                                        points[4] -= 200;
+                                        break;
+                                    },
+                                    "3" => {
+                                        items.push("good-Craftsmanship bionic");
+                                        points[4] -= 300;
+                                        break;
+                                    }
+                                    _=> invalid()
+                                }
+                            }
+                            break;
+                        },
+                        "2" => {
+                            update_attribute(attributes, ATTRIBUTE_NAMES[7], 5);
+                            let option_clarity = vec!["-5 Fellowship", "1d10 Insanity points"];
+                            loop {
+                                let choice_clarity = chose_option(&option_clarity);
+                                match choice_clarity.trim() {
+                                    "1" => {
+                                        update_attribute(attributes, ATTRIBUTE_NAMES[8], -5);
+                                        break;
+                                    },
+                                    "2" => {
+                                        points[2] += rand::thread_rng().gen_range(1..=10);
+                                        break;
+                                    },
+                                    _=> invalid(),
+                                }
+                            }
+                            break;
+                        },
+                        "3" => {
+                            update_attribute(attributes, ATTRIBUTE_NAMES[8], 5);
+                            talents.push("Peer (Ecclisarchy)");
+                            update_attribute(attributes, ATTRIBUTE_NAMES[3], -5);
+                            break;
+                        }
+                        _=> invalid(),
+                    }
+                }
+                break;
+            },
+            "6" => {
+                let options = vec!["Seeker of Truth", "Xenophile", "Fated for Greatness"];
+                loop {
+                    let choice_destiny = chose_option(&options);
+                    match choice_destiny.trim() {
+                        "1" => {
+                            talents.push("Foresight");
+                            chose_talent(talents, "Enemy (Academics)", "Enemy (Ecclisiarchy)");
+                            break;
+                        },
+                        "2" => {
+                            talents.push("+10 to Fellowsip Tests with xenos");
+                            talents.push("-5 penalty to Willpower tests involving xenos artifacts and powers");
+                            break;
+                        },
+                        "3" => {
+                            points[1] += 1;
+                            points[2] += rand::thread_rng().gen_range(1..=10) + 1;
+                            break;
+                        },
+                        _=> invalid(),
+                    }
+                }
+                break;
+            },
+            _=> invalid()
+        }
+    }
 }
 
 fn chose_talent(talents: &mut Vec<&'static str>, option_1: &'static str, option_2: &'static str) {
@@ -433,7 +704,7 @@ fn chose_attribute(attributes: &mut HashMap<&str, i32>, option_1: &'static str, 
     };
 }
 
-fn chose_points(points: &mut [i32; 4], index_1: usize, index_2: usize) {
+fn chose_points(points: &mut [i32; 5], index_1: usize, index_2: usize) {
     let point_names = ["Wounds", "Fate Points", "Insanity Points", "Corruption Points"];
     loop {
         println!("Gain [1] {} or [2] {}", point_names[index_1], point_names[index_2]);
@@ -461,8 +732,60 @@ fn chose_points(points: &mut [i32; 4], index_1: usize, index_2: usize) {
     };
 }
 
+fn chose_points_specific(points: &mut [i32; 5], index_1: usize, index_2: usize, increase: i32) {
+    let point_names = ["Wounds", "Fate Points", "Insanity Points", "Corruption Points"];
+    loop {
+        println!("Gain [1] {} or [2] {}", point_names[index_1], point_names[index_2]);
+        let mut choice = String::new();
+        io::stdin()
+                    .read_line(&mut choice)
+                    .expect("Failed to read input");
+        match choice.trim() {
+            "1" => {
+                let temp = points[index_1];
+                points[index_1] = temp + increase;
+                break
+            },
+            "2" => {
+                let temp = points[index_2];
+                points[index_2] = temp + increase;
+                break
+            },
+            _=> {
+                println!("");
+                println!("Please enter a valid input");
+                println!("");
+            }
+        };
+    };
+}
+
 fn update_attribute(attributes: &mut HashMap<&str, i32>, name: &'static str, number: i32) {
     if let Some(temp) = attributes.get(name) {
         attributes.insert(name, temp + number);
+    }
+}
+
+fn chose_option(options: &Vec<&str>) -> String {
+    {
+        println!("Please choose one of the options");
+        for i in 0..options.len() {
+            print!("[{}] {} ", i+1, &options[i]);
+        }
+        println!("");
+    }
+
+    let mut input = String::new();
+    io::stdin()
+                .read_line(&mut input)
+                .expect("Failed to read the input!");
+    input
+}
+
+fn invalid(){
+    {
+        println!("");
+        println!("Please enter a valid input");
+        println!("");
     }
 }
