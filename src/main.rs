@@ -68,8 +68,8 @@ fn main() {
 
 fn get_attributes() -> HashMap<&'static str, i32> {
     let mut attributes = HashMap::new();
-
-    let mut roll = [0; 9];
+    let mut swaps = 0;
+    let mut roll = vec![0, 0, 0, 0, 0, 0, 0, 0, 0];
     let mut total = 0;
 
     while total < 100 {
@@ -95,6 +95,82 @@ fn get_attributes() -> HashMap<&'static str, i32> {
             }
         } else {
             println!("The total was {}", total);
+        }
+    }
+
+    loop {
+        if swaps < 2 {
+        println!("Swap two Attributes? You have {} swaps left", 2-swaps);
+        println!("[1] Swap Attributes [Enter] Contine with current Attributes");
+        let mut swap_input = String::new();
+            io::stdin()
+                .read_line(&mut swap_input)
+                .expect("Failed to read the input!");
+
+
+            match swap_input.trim() {
+            "1" => {
+                loop { 
+                    {
+                        println!("Choose the first Attribute and confirm with enter");
+                        for i in 0..9 {
+                        print!("[{}] {} ", i+1, ATTRIBUTE_NAMES[i]);
+                        }
+                        println!("");
+                    }
+                    let mut attribute_1 = String::new();
+
+                    io::stdin()
+                        .read_line(&mut attribute_1)
+                        .expect("Failed to read line.");
+
+                    let attribute_1: i32 = match attribute_1.trim().parse() {
+                        Ok(num) => num,
+                        Err(_) => {
+                            println!("Please enter a number!");
+                            continue;
+                        }
+                    };
+                    if attribute_1 > 9 || attribute_1 < 1 {
+                        println!("Please enter a valid number");
+                        break;
+                    }
+                    println!("Choose the second Attribute and confirm with enter");
+                    for i in 0..9 {
+                        print!("[{}] {} ", i+1, ATTRIBUTE_NAMES[i]);
+                    }
+                    println!("");
+                    let mut attribute_2 = String::new();
+
+                    io::stdin()
+                        .read_line(&mut attribute_2)
+                        .expect("Failed to read line.");
+
+                    let attribute_2: i32 = match attribute_2.trim().parse() {
+                        Ok(num) => num,
+                        Err(_) => {
+                            println!("Please enter a number!");
+                            continue;
+                        }
+                    };
+                    if attribute_2 > 9 || attribute_2 < 1 {
+                        println!("Please enter a valid number");
+                        break;
+                    }
+                let index_1: usize = (attribute_1 - 1) as usize;
+                let index_2: usize = (attribute_2 -1) as usize;
+                roll.swap(index_1, index_2);
+                swaps += 1;
+                for r in 0..9 {
+                    println!("{} was {}", ATTRIBUTE_NAMES[r], roll[r]);
+                }
+                break;
+            }
+            },
+            _=> break,
+            }
+        } else {
+            break;
         }
     }
 
@@ -681,7 +757,7 @@ fn chose_talent_or_skill(talents: &mut Vec<&'static str>, skills: &mut Vec<&'sta
 
 fn chose_attribute(attributes: &mut HashMap<&str, i32>, option_1: &'static str, option_2: &'static str, increase: i32) {
     loop {
-        println!("Chose either [1] {} [2] {}", option_1, option_2);
+        println!("Chose {} to [1] {} [2] {}", increase, option_1, option_2);
         let mut choice = String::new();
         io::stdin()
                     .read_line(&mut choice)
