@@ -21,9 +21,12 @@ fn main() {
             "1" => {
                 let mut attributes = get_attributes();
                 let mut items: Vec<&str> = vec![];
+                let mut skills_10: Vec<&str> = vec![];
+                let mut skills_20: Vec<&str> = vec![];
                 let (mut basic_skills, mut skills, mut talents, mut points) = apply_homeworld(&mut attributes);
-                apply_birthright(&mut attributes, &mut basic_skills, &mut skills, &mut talents, &mut points);
-                apply_lure_of_the_void(&mut attributes, &mut basic_skills, &mut skills, &mut talents, &mut items, &mut points);
+                apply_birthright(&mut attributes, &mut basic_skills, &mut skills, &mut skills_10, &mut skills_20, &mut talents, &mut points);
+                apply_lure_of_the_void(&mut attributes, &mut basic_skills, &mut skills, &mut skills_10, &mut skills_20, &mut talents, &mut items, &mut points);
+               // apply_trials_and_travails(&mut attributes, &mut skills, &mut skills_10, &mut skills_20, &mut talents, &mut items, &mut points);
                 println!("");
                 println!("");
                 for name in ATTRIBUTE_NAMES{
@@ -40,6 +43,8 @@ fn main() {
                 println!("");
                 println!("Basic Skills: {:?}", basic_skills);
                 println!("Trained Skills: {:?}", skills);
+                println!("Skills +10: {:?}", skills_10);
+                println!("Skills +20: {:?}", skills_20);
                 println!("Talents and Traits: {:?}", talents);
                 println!("Items: {:?}", items);
                 println!("");
@@ -185,6 +190,7 @@ fn apply_homeworld(x: &mut HashMap<&str, i32>) -> (Vec<&'static str>, Vec<&'stat
     let homeworlds = ["Death World", "Void Born", "Forge World", "Hive World", "Imperial World", "Noble Born"];
     let mut points = [0; 5];
     points[4] = 500;
+    let mut basic_skills = vec!["Awareness", "Barter", "Carouse", "Charm", "Climb", "Command", "Concealment", "Contortionist", "Decieve", "Disguise", "Dodge", "Eavaluate", "Gamble", "Inquiry", "Intimidate", "Logic", "Scrutiny", "Search", "Silent Move", "Swim"];
     let result = loop {
         {
             println!("Please choose a homeworld:");
@@ -205,7 +211,6 @@ fn apply_homeworld(x: &mut HashMap<&str, i32>) -> (Vec<&'static str>, Vec<&'stat
                 update_attribute(x, ATTRIBUTE_NAMES[3], 5);
                 update_attribute(x, ATTRIBUTE_NAMES[7], -5);
                 update_attribute(x, ATTRIBUTE_NAMES[8], -5);
-                let basic_skills = vec![];
                 let skills = vec![];
                 let talents = vec!["Melee Weapon Training (Primitive)", "Paranoid", "Survivor"];
                 points[0] = rand::thread_rng().gen_range(1..=5) + 2;
@@ -222,7 +227,8 @@ fn apply_homeworld(x: &mut HashMap<&str, i32>) -> (Vec<&'static str>, Vec<&'stat
             "2" => {
                 update_attribute(x, ATTRIBUTE_NAMES[2], -5);
                 update_attribute(x, ATTRIBUTE_NAMES[7], 5);
-                let basic_skills = vec!["Navigation (Stellar)", "Pilot (Spacecraft)"];
+                basic_skills.push("Navigation (Stellar)");
+                basic_skills.push("Pilot (Spacecraft)");
                 let skills = vec!["Speak Language (Ship Dialect)"];
                 let talents = vec!["Charmed", "Ill-omened", "Shipwise", "Void Accustomed"];
                 points[0] = rand::thread_rng().gen_range(1..=5);
@@ -239,7 +245,8 @@ fn apply_homeworld(x: &mut HashMap<&str, i32>) -> (Vec<&'static str>, Vec<&'stat
             "3" => {
                 update_attribute(x, ATTRIBUTE_NAMES[0], -5);
                 update_attribute(x, ATTRIBUTE_NAMES[5], 5);
-                let basic_skills = vec!["Common Lore (Tech)", "Common Lore (Machine Cult)"];
+                basic_skills.push("Common Lore (Tech)");
+                basic_skills.push("Common Lore (Machine Cult)");
                 let skills = vec![];
                 let talents = vec!["Technical Knock", "Stranger to the Cult"];
                 loop {
@@ -316,7 +323,8 @@ fn apply_homeworld(x: &mut HashMap<&str, i32>) -> (Vec<&'static str>, Vec<&'stat
             "4" => {
                 update_attribute(x, ATTRIBUTE_NAMES[3], -5);
                 update_attribute(x, ATTRIBUTE_NAMES[8], 5);
-                let basic_skills = vec!["Speak Language (Hive Dialect)", "Tech-Use"];
+                basic_skills.push("Speak Language (Hive Dialect)");
+                basic_skills.push("Tech-Use");
                 let skills = vec![];
                 let talents = vec!["Accustomed to Crowds", "Hivebound", "Wary"];
                 points[0] = rand::thread_rng().gen_range(1..=5) + 1;
@@ -334,7 +342,11 @@ fn apply_homeworld(x: &mut HashMap<&str, i32>) -> (Vec<&'static str>, Vec<&'stat
             },
             "5" => {
                 update_attribute(x, ATTRIBUTE_NAMES[7], 3);
-                let basic_skills = vec!["Common Lore (Imperium)", "Common Lore (Imperial Creed)", "Common Lore (War)", "Literacy", "Speak Language (High Gothic)"];
+                basic_skills.push("Common Lore (Imperium)");
+                basic_skills.push("Common Lore (Imperial Creed)");
+                basic_skills.push("Common Lore (War)");
+                basic_skills.push("Literacy");
+                basic_skills.push("Speak Language (High Gothic)");
                 let skills = vec![];
                 let talents = vec!["Blessed Ignorance"];
                 points[0] = rand::thread_rng().gen_range(1..=5);
@@ -351,7 +363,9 @@ fn apply_homeworld(x: &mut HashMap<&str, i32>) -> (Vec<&'static str>, Vec<&'stat
             "6" => {
                 update_attribute(x, ATTRIBUTE_NAMES[7], -5);
                 update_attribute(x, ATTRIBUTE_NAMES[8], 5);
-                let basic_skills = vec!["Literacy", "Speak Language (High Gothic)", "Speak Language (Low Gothic)"];
+                basic_skills.push("Literacy");
+                basic_skills.push("Speak Language (High Gothic)");
+                basic_skills.push("Speak Language (Low Gothic)");
                 let skills = vec![];
                 let talents = vec!["Etiquette", "Legacy of Wealth", "Supremely Connected", "Vendetta"];
                 points[0] = rand::thread_rng().gen_range(1..=5);
@@ -378,7 +392,7 @@ fn apply_homeworld(x: &mut HashMap<&str, i32>) -> (Vec<&'static str>, Vec<&'stat
     result
 }
 
-fn apply_birthright(attributes: &mut HashMap<&str, i32>, basic_skills: &mut Vec<&'static str>, skills: &mut Vec<&'static str>, talents: &mut Vec<&'static str>, points: &mut [i32; 5]) {
+fn apply_birthright(attributes: &mut HashMap<&str, i32>, basic_skills: &mut Vec<&'static str>, skills: &mut Vec<&'static str>, skills_10: &mut Vec<&'static str>, skills_20: &mut Vec<&'static str>, talents: &mut Vec<&'static str>, points: &mut [i32; 5]) {
     let birthrights = ["Scavenger", "Scapegrace", "Stubjack", "Child of the Creed", "Savant", "Vaunted"];
     loop {
         {
@@ -422,7 +436,7 @@ fn apply_birthright(attributes: &mut HashMap<&str, i32>, basic_skills: &mut Vec<
                 break;
             },
             "5" => {
-                chose_talent_or_skill(talents, skills, "Peer (Academic)", "Logic");
+                chose_talent_or_skill(talents, basic_skills, skills, skills_10, skills_20, "Peer (Academic)", "Logic");
                 chose_attribute(attributes, ATTRIBUTE_NAMES[5], ATTRIBUTE_NAMES[8], 3);
                 update_attribute(attributes, ATTRIBUTE_NAMES[3], -3);
                 break;
@@ -444,7 +458,7 @@ fn apply_birthright(attributes: &mut HashMap<&str, i32>, basic_skills: &mut Vec<
     };
 }
 
-fn apply_lure_of_the_void(attributes: &mut HashMap<&str, i32>, _basic_skills: &mut Vec<&'static str>, skills: &mut Vec<&'static str>, talents: &mut Vec<&'static str>,items: &mut Vec<&'static str>, points: &mut [i32; 5]) {
+fn apply_lure_of_the_void(attributes: &mut HashMap<&str, i32>, basic_skills: &mut Vec<&'static str>, skills: &mut Vec<&'static str>, skills_10: &mut Vec<&'static str>, skills_20: &mut Vec<&'static str>, talents: &mut Vec<&'static str>,items: &mut Vec<&'static str>, points: &mut [i32; 5]) {
     let lures_of_the_void = ["Tainted", "Criminal", "Renegade", "Duty Bound", "Zealot", "Chosen by Destiny"];
     loop {
         {
@@ -580,7 +594,7 @@ fn apply_lure_of_the_void(attributes: &mut HashMap<&str, i32>, _basic_skills: &m
                         "3" => {
                             chose_points_specific(points, 2, 3, rand::thread_rng().gen_range(1..=5)+1);
                             talents.push("Dark Soul");
-                            skills.push("Forbiden Lore (Chose One)");
+                            add_skill(basic_skills, skills, skills_10, skills_20,"Forbiden Lore (Chose One)");
                             break;
                         }
                         _=> invalid()
@@ -705,6 +719,10 @@ fn apply_lure_of_the_void(attributes: &mut HashMap<&str, i32>, _basic_skills: &m
     }
 }
 
+//fn apply_trials_and_travails(attributes: &mut HashMap<&str, i32>, skills: &mut Vec<&'static str>, skills_10: &mut Vec<&'static str>, skills_20: &mut Vec<&'static str>, talents: &mut Vec<&'static str>, items: &mut Vec<&'static str>, points: &mut [i32; 5]) {
+
+//}
+
 fn chose_talent(talents: &mut Vec<&'static str>, option_1: &'static str, option_2: &'static str) {
     loop {
         println!("Chose either [1] {} [2] {}", option_1, option_2);
@@ -714,11 +732,11 @@ fn chose_talent(talents: &mut Vec<&'static str>, option_1: &'static str, option_
                     .expect("Failed to read input");
         match choice.trim() {
             "1" => {
-                talents.push(option_1);
+                add_talent(talents, option_1);
                 break
             },
              "2" => {
-                talents.push(option_2);
+                add_talent(talents,option_2);
                 break
             },
             _=> {
@@ -730,7 +748,7 @@ fn chose_talent(talents: &mut Vec<&'static str>, option_1: &'static str, option_
     };
 }
 
-fn chose_talent_or_skill(talents: &mut Vec<&'static str>, skills: &mut Vec<&'static str>, option_1: &'static str, option_2: &'static str) {
+fn chose_talent_or_skill(talents: &mut Vec<&'static str>,basic_skills: &mut Vec<&'static str>, skills: &mut Vec<&'static str>, skills_10: &mut Vec<&'static str>, skills_20: &mut Vec<&'static str>, option_1: &'static str, option_2: &'static str) {
     loop {
         println!("Chose either [1] {} (Talent) [2] {} (Skill)", option_1, option_2);
         let mut choice = String::new();
@@ -739,11 +757,11 @@ fn chose_talent_or_skill(talents: &mut Vec<&'static str>, skills: &mut Vec<&'sta
                     .expect("Failed to read input");
         match choice.trim() {
             "1" => {
-                talents.push(option_1);
+                add_talent(talents, option_1);
                 break
             },
              "2" => {
-                skills.push(option_2);
+                add_skill(basic_skills, skills, skills_10, skills_20, option_2);
                 break
             },
             _=> {
@@ -856,6 +874,29 @@ fn chose_option(options: &Vec<&str>) -> String {
                 .read_line(&mut input)
                 .expect("Failed to read the input!");
     input
+}
+
+fn add_talent(talents: &mut Vec<&'static str>, talent: &'static str) {
+    if talents.contains(&talent) {
+        talents.push("Talented (Choose One)");
+    } else {
+        talents.push(talent);
+    }
+}
+
+fn add_skill(basic_skills: &mut Vec<&'static str>, skills: &mut Vec<&'static str>, skills_10: &mut Vec<&'static str>, skills_20: &mut Vec<&'static str>, skill: &'static str) {
+    if skills_10.contains(&skill) {
+        skills_10.retain(|&x| x != skill);
+        skills_20.push(skill);
+    }
+    if skills.contains(&skill){
+        skills.retain(|&x| x != skill);
+        skills_10.push(skill);
+    }
+    if basic_skills.contains(&skill) {
+        basic_skills.retain(|&x| x != skill);
+        skills.push(skill);
+    }
 }
 
 fn invalid(){
