@@ -27,6 +27,7 @@ fn main() {
                 apply_birthright(&mut attributes, &mut basic_skills, &mut skills, &mut skills_10, &mut skills_20, &mut talents, &mut points);
                 apply_lure_of_the_void(&mut attributes, &mut basic_skills, &mut skills, &mut skills_10, &mut skills_20, &mut talents, &mut items, &mut points);
                 apply_trials_and_travails(&mut attributes, &mut basic_skills, &mut skills, &mut skills_10, &mut skills_20, &mut talents, &mut items, &mut points);
+                apply_motivation(&mut attributes, &mut talents, &mut items, &mut points);
                 println!("");
                 println!("");
                 for name in ATTRIBUTE_NAMES{
@@ -823,6 +824,81 @@ fn apply_trials_and_travails(_attributes: &mut HashMap<&str, i32>, basic_skills:
                 add_talent(talents, "Brook No Insult");
                 break
             },
+            _=> invalid(),
+        }
+    }
+}
+
+fn apply_motivation(attributes: &mut HashMap<&str, i32>, talents: &mut Vec<&'static str>, items: &mut Vec<&'static str>, points: &mut [i32; 5]) {
+    let motivations = ["Endurance", "Forutne", "Vengeance", "Renown", "Pride", "Prestige"];
+    loop {
+        {
+            println!("Please choose your Motivation:");
+            for i in 0..6 {
+                print!("[{}] {} ", i+1, &motivations[i]);
+            }
+            println!("");
+        }
+
+        let mut input = String::new();
+        io::stdin()
+                    .read_line(&mut input)
+                    .expect("Failed to read the input!");
+        
+        match input.trim() {
+            "1" => {
+                points[0] += 1;
+                break;
+            },
+            "2" => {
+                points[1] += 1;
+                break;
+            },
+            "3" => {
+                talents.push("Hatred (choose one)");
+                break;
+            },
+            "4" => {
+                chose_talent(talents, "Air of Authority", "Peer (choose one)");
+                break;
+            },
+            "5" => {
+                let options = vec!["Heirloom Item", "+3 Toughness"];
+                loop {
+                    let choice = chose_option(&options);
+                    match choice.trim() {
+                        "1" => {
+                            let roll = rand::thread_rng().gen_range(1..=100);
+                            if roll <= 20 {
+                                items.push("Archeotech Laspistol");
+                                break;
+                            } else if roll >= 21 && roll <= 40 {
+                                items.push("Angevin Era Chainsword");
+                                break;
+                            } else if roll >= 41 && roll <= 60 {
+                                items.push("Ancestral Seal");
+                                break;
+                            } else if roll >= 61 && roll <= 80 {
+                                items.push("Saint-blessed Carapace Armour");
+                                break;
+                            } else {
+                                items.push("Reliquary of Saint Drusus");
+                                break;
+                            }
+                        },
+                        "2" => {
+                            update_attribute(attributes, ATTRIBUTE_NAMES[3], 3);
+                            break;
+                        },
+                        _=> invalid(),
+                    }
+                }
+                break;
+            },
+            "6" => {
+                chose_talent(talents, "Talented (chose one)", "Peer (choose one)");
+                break;
+            }
             _=> invalid(),
         }
     }
