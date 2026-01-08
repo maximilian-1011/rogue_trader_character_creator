@@ -28,6 +28,7 @@ fn main() {
                 apply_lure_of_the_void(&mut attributes, &mut basic_skills, &mut skills, &mut skills_10, &mut skills_20, &mut talents, &mut items, &mut points);
                 apply_trials_and_travails(&mut attributes, &mut basic_skills, &mut skills, &mut skills_10, &mut skills_20, &mut talents, &mut items, &mut points);
                 apply_motivation(&mut attributes, &mut talents, &mut items, &mut points);
+                apply_career_path(&mut basic_skills, &mut skills, &mut skills_10, &mut skills_20, &mut talents, &mut items, &mut points);
                 println!("");
                 println!("");
                 for name in ATTRIBUTE_NAMES{
@@ -424,7 +425,7 @@ fn apply_birthright(attributes: &mut HashMap<&str, i32>, basic_skills: &mut Vec<
             },
             "3" => {
                 talents.push("Quick Draw");
-                skills.push("Intimidate");
+                add_skill(basic_skills, skills, skills_10, skills_20, "Intimidate");
                 chose_attribute(attributes, ATTRIBUTE_NAMES[0], ATTRIBUTE_NAMES[1], 5);
                 update_attribute(attributes, ATTRIBUTE_NAMES[8], -5);
                 points[2] += rand::thread_rng().gen_range(1..=5);
@@ -583,7 +584,7 @@ fn apply_lure_of_the_void(attributes: &mut HashMap<&str, i32>, basic_skills: &mu
                         "1" => {
                             talents.push("Enemy (Adeptus Arbites)");
                             talents.push("Resistance (Interogation)");
-                            skills.push("Concealment");
+                            add_skill(basic_skills, skills, skills_10, skills_20, "Concealment");
                             break;
                         },
                         "2" => {
@@ -904,6 +905,166 @@ fn apply_motivation(attributes: &mut HashMap<&str, i32>, talents: &mut Vec<&'sta
     }
 }
 
+fn apply_career_path(basic_skills: &mut Vec<&'static str>, skills: &mut Vec<&'static str>, skills_10: &mut Vec<&'static str>, skills_20: &mut Vec<&'static str>, talents: &mut Vec<&'static str>, items: &mut Vec<&'static str>, points: &mut [i32; 5]) {
+    let careers = ["Rogue Trader", "Arch Militant", "Astropath Transcenent", "Explorator", "Missionary", "Navigator", "Seneshal", "Void-Master"];
+    loop {
+        {
+            println!("Please choose your Motivation:");
+            for i in 0..8 {
+                print!("[{}] {} ", i+1, &careers[i]);
+            }
+            println!("");
+        }
+
+        let mut input = String::new();
+        io::stdin()
+                    .read_line(&mut input)
+                    .expect("Failed to read the input!");
+        
+        match input.trim() {
+            "1" => {
+                let rogue_trader_skills = ["Command", "Commerce", "Charm", "Common Lore (Imperium)", "Evaluate", "Literacy", "Scholastic Lore (Astromancy)", "Speak Language (High Gothic)", "Speak Language (Low Gothic)"];
+                for skill in rogue_trader_skills {
+                    add_skill(basic_skills, skills, skills_10, skills_20, skill);
+                }
+                let rogue_trader_talents = ["Air of Authority", "Pistol Training (Universal)", "Melee Weapon Training (Universal)"];
+                for talent in rogue_trader_talents {
+                    add_talent(talents, talent);
+                }
+                choose_item_3(items, "Best-Craftsmanship Laspistol", "Good-Craftsmanship hand cannon", "Common-Craftsmanship plasma pistol");
+                choose_item(items, "Best-Craftsmanship mono-sword", "Common-Craftsmanship power sword");
+                let rogue_trader_items = ["Micro-bead", "Void Suit", "Set of fine clothing", "xeno-pelt cloak"];
+                for item in rogue_trader_items {
+                    items.push(item);
+                }
+                choose_item(items, "Best-Craftsmanship enforcer light carapace", "Storm trooper carapace");
+                break;
+            },
+            "2" => {
+                let arch_militant_skills = ["Common Lore (War)", "Dodge", "Intimidate", "Scholastic Lore (Tactica Imperialis)", "Secret Tongue (Military)", "Speak Language (Low Gothic)"];
+                for skill in arch_militant_skills {
+                    add_skill(basic_skills, skills, skills_10, skills_20, skill);
+                }
+                let arch_militant_talents = ["Basic Weapon Training (Universal)", "Pistol Weapon Training (Universal)", "Melee Weapon Training (Universal)", "Thrown Weapon Training (Universal)", "Sound Constitution"];
+                for talent in arch_militant_talents {
+                    add_talent(talents, talent);
+                }
+                points[0] += 1;
+                choose_item_3(items, "Good-Craftsmanship hellgun", "Best-Craftsmanship hunting rifle", "Two bolt pistols");
+                let arch_militant_items = ["One Good-Craftsmanship primitive melee weapon of your choice with the mono upgrade", "Micro-bead", "Void Suit", "Enforcer light carapace armour", "Bolt shell keepsake", "Medikit", "Manacles",];
+                for item in arch_militant_items {
+                    items.push(item);
+                }
+                choose_item_3(items, "Data-slate full of wanted boutnies", "Arms coffer", "3 doses of stimm");
+                break;
+            },
+            "3" => {
+                let astropath_skills = ["Awareness", "Common Lore (Adeptus Astra Telepathica)", "Forbidden Lore (Psykers)", "Invocation", "Psyniscience", "Scholastic Lore (Cryptology)", "Speak Language (High Gothic)", "Speak Language (Low Gothic)"];
+                for skill in astropath_skills {
+                    add_skill(basic_skills, skills, skills_10, skills_20, skill);
+                }
+                let astropath_talents = ["Pistol Weapon Training (Universal)", "Heightened Senses (Sound)", "Psy Rating 2"];
+                for talent in astropath_talents {
+                    add_talent(talents, talent);
+                }
+                choose_item(items, "Best-Craftsmanship Laspistol", "Best-Craftsmanship stup automatic");
+                choose_item(items, "Best-Craftsmanship mono-sword", "Common-Craftsmanship shock staff");
+                let astropath_items = ["Guard flak armour", "Charm", "Void Suit", "Micro-bead", "Psy-focus"];
+                for item in astropath_items {
+                    items.push(item);
+                }
+                break;
+            },
+            "4" => {
+                let explorator_skills = ["Common Lore (Machine Cult)", "Common Lore (Tech)", "Forbidden Lore (Archeotech)", "Forbidden Lore (Adeptus Mechanicus)", "Literacy", "Logic", "Speak Language (Explorator Binary)", "Speak Language (Low Gothic)", "Speak Language (Techna-lingua)", "Tech-Use", "Trade (Technomat)"];
+                for skill in explorator_skills {
+                    add_skill(basic_skills, skills, skills_10, skills_20, skill);
+                }
+                let explorator_talents = ["Mechanicus Implants", "Basic Weapon Training (Universal)", "Melee Weapon Training (Universal)", "Logis Implant"];
+                for talent in explorator_talents {
+                    add_talent(talents, talent);
+                }
+                choose_item_3(items, "Boltgun", "Best-Craftsmanship", "Good-Craftsmanship hellgun");
+                choose_item(items, "Best-Craftsmanship shock staff", "Good-Craftsmanship power axe");
+                let explorator_items = ["Enforcer light carapace", "Multikey", "Void Suit", "Injector", "Sacred Unguents", "Micro-bead", "Combi-tool", "Dataslate", "Servo-skull familiar"];
+                for item in explorator_items {
+                    items.push(item);
+                }
+                break;
+            },
+            "5" => {
+                let missionary_skills = ["Common Lore (Imperial Creed)", "Common Lore (Imperium)", "Forbidden Lore (Heresy)", "Medicae", "Scholastic Lore (Imperial Creed)", "Speak Language (High Gothic)", "Speak Language (Low Gothic)"];
+                for skill in missionary_skills {
+                    add_skill(basic_skills, skills, skills_10, skills_20, skill);
+                }
+                let missionary_talents = ["Basic Weapon Training (Universal)", "Melee Weapon Training (Universal)", "Pure Faith", "Unshakable Faith"];
+                for talent in missionary_talents {
+                    add_talent(talents, talent);
+                }
+                choose_item(items, "Good-Craftsmanship chainsword", "Best-Craftsmanship staff");
+                choose_item(items, "Good-Craftsmanship flamer", "Best-Craftsmanship lasgun");
+                let missionary_items = ["Best-Craftsmanship guard flak armour", "Ecclisiarchal robes", "Aquila pendant", "Sepulchre", "Censer and incense", "Micro-bead"];
+                for item in missionary_items {
+                    items.push(item);
+                }
+                break;
+            },
+            "6" => {
+                let navigator_skills = ["Common Lore (Navis Nobilite)", "Forbidden Lore (Navigators)", "Forbidden Lore (Warp)", "Lieracy", "Navigation (Stellar)", "Navigation (Warp)", "Psyniscience", "Scholastic Lore (Astormancy)", "Speak Language (High Gothic)", "Speak Language (Low Gothic)"];
+                for skill in navigator_skills {
+                    add_skill(basic_skills, skills, skills_10, skills_20, skill);
+                }
+                let navigator_talents = ["Navigator", "Pistol Weapon Training (Universal)"];
+                for talent in navigator_talents {
+                    add_talent(talents, talent);
+                }
+                choose_item(items, "Best-Craftsmanship hellpistol", "Good-Craftsmanship hand cannon");
+                let navigator_items = ["Best-Craftsmanship metal staff", "Best-Craftsmanship xeno-mesh armour", "Emperor's tarot deck", "Silk headscarf", "Nobilite robes", "Micro-bead"];
+                for item in navigator_items {
+                    items.push(item);
+                }
+                break;
+            },
+            "7" => {
+                let seneschal_skills = ["Barter", "Commerce", "Common Lore (Underworld)", "Decieve", "Evaluate", "Forbidden Lore (Archeotech)", "Inquiry", "Literacy", "Speak Language (Low Gothic)", "Speak Langugae (Trader's Cant)"];
+                for skill in seneschal_skills {
+                    add_skill(basic_skills, skills, skills_10, skills_20, skill);
+                }
+                let seneschal_talents = ["Basic Weapon Training (Universal)", "Pistol Weapon Training (Universal)"];
+                for talent in seneschal_talents {
+                    add_talent(talents, talent);
+                }
+                choose_item(items, "Best-Craftsmanship hellpistol", "Common-Craftsmanship inferno pistol");
+                choose_item(items, "Best-Craftsmanship hellgun", "Common-Craftsmanship boltgun");
+                let seneschal_items = ["Xeno-mesh armour", "Autoquill", "Dataslate", "Micro-bead", "Multikey", "Two sets of robes", "Synskin", "Chrono", "Cameleoline claok"];
+                for item in seneschal_items {
+                    items.push(item);
+                }
+                break;
+            },
+            "8" => {
+                let void_skills = ["Common Lore (Imperial Navy)", "Common Lore (War)", "Forbidden Lore (Xenos)", "Navigation (Stellar)", "Pilot (Space Craft)", "Pilot (Flyers)", "Scholastic Lore (Astromancy)", "Speak Langugage (Low Gothic)"];
+                for skill in void_skills {
+                    add_skill(basic_skills, skills, skills_10, skills_20, skill);
+                }
+                let void_talents = ["Pistol Weapon Training (Universal)", "Melee Weapon Training (Universal)", "Nerves of Steel"];
+                for talent in void_talents {
+                    add_talent(talents, talent);
+                }
+                choose_item(items, "Best-Craftsmanship mono-sword", "Common-Craftsmanship power sword");
+                choose_item(items, "Best-Craftsmanship hand cannon", "Common-Craftsmanship bolt pistol");
+                choose_item(items, "Imperial Navy uniform", "Beggar's cloak");
+                let void_items = ["Guard flak armour", "Micro-bead", "Void suit", "Blessed ship token", "Re-breather", "2 bottles of amasec", "Pict-recorder", "Vox-caster"];
+                for item in void_items {
+                    items.push(item);
+                }
+                break;
+            }
+            _=> invalid(),
+        }
+    }
+}
+
 fn chose_talent(talents: &mut Vec<&'static str>, option_1: &'static str, option_2: &'static str) {
     loop {
         println!("Chose either [1] {} [2] {}", option_1, option_2);
@@ -1057,6 +1218,52 @@ fn chose_option(options: &Vec<&str>) -> String {
     input
 }
 
+fn choose_item(items: &mut Vec<&'static str>, item1: &'static str, item2: &'static str) {
+    loop {
+        println!("Chose either [1] {} [2] {}", item1, item2);
+        let mut choice = String::new();
+        io::stdin()
+                    .read_line(&mut choice)
+                    .expect("Failed to read input");
+        match choice.trim() {
+            "1" => {
+                items.push(item1);
+                break
+            },
+             "2" => {
+                items.push(item2);
+                break
+            },
+            _=> invalid(),
+        };
+    };
+}
+
+fn choose_item_3(items: &mut Vec<&'static str>, item1: &'static str, item2: &'static str, item3: &'static str) {
+    loop {
+        println!("Chose either [1] {} [2] {} [3] {}", item1, item2, item3);
+        let mut choice = String::new();
+        io::stdin()
+                    .read_line(&mut choice)
+                    .expect("Failed to read input");
+        match choice.trim() {
+            "1" => {
+                items.push(item1);
+                break
+            },
+             "2" => {
+                items.push(item2);
+                break
+            },
+            "3" => {
+                items.push(item3);
+                break;
+            }
+            _=> invalid(),
+        };
+    };
+}
+
 fn add_talent(talents: &mut Vec<&'static str>, talent: &'static str) {
     if talents.contains(&talent) {
         talents.push("Talented (Choose One)");
@@ -1069,13 +1276,13 @@ fn add_skill(basic_skills: &mut Vec<&'static str>, skills: &mut Vec<&'static str
     if skills_10.contains(&skill) {
         skills_10.retain(|&x| x != skill);
         skills_20.push(skill);
-    }
-    if skills.contains(&skill){
+    } else if skills.contains(&skill){
         skills.retain(|&x| x != skill);
         skills_10.push(skill);
-    }
-    if basic_skills.contains(&skill) {
+    } else if basic_skills.contains(&skill) {
         basic_skills.retain(|&x| x != skill);
+        skills.push(skill);
+    } else {
         skills.push(skill);
     }
 }
