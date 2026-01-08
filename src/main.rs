@@ -1,4 +1,4 @@
-use std::io;
+use std::{io, vec};
 use std::collections::HashMap;
 
 use rand::Rng;
@@ -26,7 +26,7 @@ fn main() {
                 let (mut basic_skills, mut skills, mut talents, mut points) = apply_homeworld(&mut attributes);
                 apply_birthright(&mut attributes, &mut basic_skills, &mut skills, &mut skills_10, &mut skills_20, &mut talents, &mut points);
                 apply_lure_of_the_void(&mut attributes, &mut basic_skills, &mut skills, &mut skills_10, &mut skills_20, &mut talents, &mut items, &mut points);
-               // apply_trials_and_travails(&mut attributes, &mut skills, &mut skills_10, &mut skills_20, &mut talents, &mut items, &mut points);
+                apply_trials_and_travails(&mut attributes, &mut basic_skills, &mut skills, &mut skills_10, &mut skills_20, &mut talents, &mut items, &mut points);
                 println!("");
                 println!("");
                 for name in ATTRIBUTE_NAMES{
@@ -719,9 +719,114 @@ fn apply_lure_of_the_void(attributes: &mut HashMap<&str, i32>, basic_skills: &mu
     }
 }
 
-//fn apply_trials_and_travails(attributes: &mut HashMap<&str, i32>, skills: &mut Vec<&'static str>, skills_10: &mut Vec<&'static str>, skills_20: &mut Vec<&'static str>, talents: &mut Vec<&'static str>, items: &mut Vec<&'static str>, points: &mut [i32; 5]) {
+fn apply_trials_and_travails(_attributes: &mut HashMap<&str, i32>, basic_skills: &mut Vec<&'static str>, skills: &mut Vec<&'static str>, skills_10: &mut Vec<&'static str>, skills_20: &mut Vec<&'static str>, talents: &mut Vec<&'static str>, _items: &mut Vec<&'static str>, points: &mut [i32; 5]) {
+    let trials_and_travails = ["The Hand of War", "Press-Ganged", "Calamity", "Ship-Lorn", "Dark Voyage", "High Vendetta"];
+    loop {
+        {
+            println!("Please choose your Trials and Travails:");
+            for i in 0..6 {
+                print!("[{}] {} ", i+1, &trials_and_travails[i]);
+            }
+            println!("");
+        }
 
-//}
+        let mut input = String::new();
+        io::stdin()
+                    .read_line(&mut input)
+                    .expect("Failed to read the input!");
+        
+        match input.trim() {
+            "1" => {
+                chose_talent(talents, "Weapon Training (Chose One)", "Leap Up");
+                let enemies = vec!["Orks", "Eldar", "Mutants", "Chaos Worshipers", "The Imperial Guard", "The Imperial Navy", "Void Pirates"];
+                loop {
+                    let choice_enemy = chose_option(&enemies);
+                    match choice_enemy.trim() {
+                        "1" => {
+                            add_talent(talents, "Hatred (Orks)");
+                            break
+                        },
+                        "2" => {
+                            add_talent(talents, "Hatred (Eldar)");
+                            break
+                        },
+                        "3" => {
+                            add_talent(talents, "Hatred (Mutants)");
+                            break
+                        },
+                        "4" => {
+                            add_talent(talents, "Hatred (Chaos Worshipers)");
+                            break
+                        },
+                        "5" => {
+                            add_talent(talents, "Hatred (Imperial Guard)");
+                            break
+                        },
+                        "6" => {
+                            add_talent(talents, "Hatred (Imperial Navy)");
+                            break
+                        },
+                        "7" => {
+                            add_talent(talents, "Hatred (Void Pirates)");
+                            break
+                        },
+                        _=> invalid(),
+                    }
+                    add_talent(talents, "Face of the Enemy");
+                }             
+                break
+            },
+            "2" => {
+                let options = vec!["Gain a single Skill (as long as it has no prerequisits)", "Select an additional Common Lore Skill", "Improve Common Lore Skill"];
+                loop {
+                    let choice = chose_option(&options);
+                    match choice.trim() {
+                        "1" => {
+                            add_skill(basic_skills, skills, skills_10, skills_20, "Chose one Skill that has no prerequisits");
+                            break
+                        },
+                        "2" => {
+                            add_skill(basic_skills, skills, skills_10, skills_20, "Common Lore Skill (Choose one)");
+                            break
+                        },
+                        "3" => {
+                            add_skill(basic_skills, skills, skills_10, skills_20, "Chose one Common Lore skill to improve by one level"); 
+                            break
+                        },
+                        _=> invalid(),
+                    }
+                }
+                add_talent(talents, "Jealous Freedom");
+                break
+            },
+            "3" => {
+                add_talent(talents, "Light Sleeper");
+                chose_talent(talents, "Hardy", "Nerves of Steel");
+                add_talent(talents, "Echo of Hard Times");
+                break
+            },
+            "4" => {
+                chose_talent_or_skill(talents, basic_skills, skills, skills_10, skills_20, "Dark Soul","Survival");
+                add_talent(talents, "Against All Odds");
+                points[1] -= 1;
+                add_talent(talents, "Ill-starred");
+                break
+            },
+            "5" => {
+                chose_talent_or_skill(talents, basic_skills, skills, skills_10, skills_20, "Resistance (Fear)", "Forbidden Lore (Choose One)");
+                points[2] += rand::thread_rng().gen_range(1..=5);
+                break
+            },
+            "6" => {
+                chose_talent(talents, "Die Hard", "Paranoia");
+                add_skill(basic_skills, skills, skills_10, skills_20, "Inquiry");
+                add_talent(talents, "Brook No Insult");
+                break
+            },
+            _=> invalid(),
+        }
+    }
+}
 
 fn chose_talent(talents: &mut Vec<&'static str>, option_1: &'static str, option_2: &'static str) {
     loop {
@@ -748,20 +853,20 @@ fn chose_talent(talents: &mut Vec<&'static str>, option_1: &'static str, option_
     };
 }
 
-fn chose_talent_or_skill(talents: &mut Vec<&'static str>,basic_skills: &mut Vec<&'static str>, skills: &mut Vec<&'static str>, skills_10: &mut Vec<&'static str>, skills_20: &mut Vec<&'static str>, option_1: &'static str, option_2: &'static str) {
+fn chose_talent_or_skill(talents: &mut Vec<&'static str>,basic_skills: &mut Vec<&'static str>, skills: &mut Vec<&'static str>, skills_10: &mut Vec<&'static str>, skills_20: &mut Vec<&'static str>, talent: &'static str, skill: &'static str) {
     loop {
-        println!("Chose either [1] {} (Talent) [2] {} (Skill)", option_1, option_2);
+        println!("Chose either [1] {} (Talent) [2] {} (Skill)", talent, skill);
         let mut choice = String::new();
         io::stdin()
                     .read_line(&mut choice)
                     .expect("Failed to read input");
         match choice.trim() {
             "1" => {
-                add_talent(talents, option_1);
+                add_talent(talents, talent);
                 break
             },
              "2" => {
-                add_skill(basic_skills, skills, skills_10, skills_20, option_2);
+                add_skill(basic_skills, skills, skills_10, skills_20, skill);
                 break
             },
             _=> {
