@@ -213,8 +213,30 @@ fn apply_homeworld(x: &mut HashMap<&str, i32>) -> (Vec<&'static str>, Vec<&'stat
                 update_attribute(x, ATTRIBUTE_NAMES[3], 5);
                 update_attribute(x, ATTRIBUTE_NAMES[7], -5);
                 update_attribute(x, ATTRIBUTE_NAMES[8], -5);
-                let skills = vec![];
-                let talents = vec!["Melee Weapon Training (Primitive)", "Paranoid", "Survivor"];
+                let skills = vec!["Survival"];
+                let mut talents = vec!["Melee Weapon Training (Primitive)", "Paranoid", "Survivor"];
+                loop {
+                    println!("Chose either the [1] {} [2] {} talent", "Jaded", "Resistence (Poison)");
+                    let mut choice = String::new();
+                    io::stdin()
+                                .read_line(&mut choice)
+                                .expect("Failed to read input");
+                    match choice.trim() {
+                        "1" => {
+                            talents.push("Jaded");
+                            break
+                        },
+                        "2" => {
+                            talents.push("Resistance (Poison)");
+                            break
+                        },
+                        _=> {
+                            println!("");
+                            println!("Please enter a valid input");
+                            println!("");
+                        }
+                    };
+                };
                 points[0] = rand::thread_rng().gen_range(1..=5) + 2;
                 points[1] = {
                     let roll = rand::thread_rng().gen_range(1..=10);
@@ -1067,7 +1089,7 @@ fn apply_career_path(basic_skills: &mut Vec<&'static str>, skills: &mut Vec<&'st
 
 fn chose_talent(talents: &mut Vec<&'static str>, option_1: &'static str, option_2: &'static str) {
     loop {
-        println!("Chose either [1] {} [2] {}", option_1, option_2);
+        println!("Chose either the [1] {} [2] {} talent", option_1, option_2);
         let mut choice = String::new();
         io::stdin()
                     .read_line(&mut choice)
